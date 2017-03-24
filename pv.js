@@ -47,7 +47,7 @@
     //通过Image对象请求后端脚本
     var data  = window['imgDataPv'] || (window['imgDataPv'] = {});
     var img   = new Image(1, 1);
-    img.src = 'http://data.hinabian.com/stat/pv?' + args;
+    img.src = '//data.hinabian.com/stat/pv?' + args;
     data[date.getTime()] = img;
 
     // setTimeout(function(){

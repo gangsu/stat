@@ -55,7 +55,7 @@
         domain: '.hinabian.com',
         delay: false,
         delay_attr: '_delay',
-        event_attr: '_click_event',
+        event_attr: '_event',
         mouse_limit: 1500
     };
 
@@ -220,9 +220,12 @@
     }
     
     // 加入cookie，下次上报
-    var setDelayCookie = function() {
+    var setDelayCookie = function(args) {
+        showLog('click cookie');
         // 获得参数
-        var args = getParamStr();
+        if ( args == undefined ) {
+            args = getParamStr();
+        }
         var cookieStr = getCookie(options.cookie);
         if ( cookieStr == '' ) {
             cookieStr = args;
@@ -233,7 +236,7 @@
         clearParam();
     }
 
-    // 上报cookie
+    // 上报cookie中的请求，页面加载时上报
     var rpCookie = function() {
         // 获得cookie，循环操作
         var cookieStr = getCookie(options.cookie);
@@ -269,13 +272,13 @@
             img = null;
             delete data[uid];
         }
-        img.src = 'http://data.hinabian.com/stat/click?' + args;
+        img.src = '//data.hinabian.com/stat/click?' + args;
         
         showLog(img.src);
         clearParam();
     }
 
-    // js上报函数
+    // js上报函数，通过js调用
     var rpComm = function(obj) {
         showLog('click');
         clickObj = obj;
@@ -285,7 +288,7 @@
             rpClick();
         }
     }
-    var rpCommParam = function(param) {
+    var rpCommParam = function(param, delay) {
         if ( param != undefined ) {
             var args = '';
             var defaultParam = getDefaultParamObj();
@@ -294,7 +297,11 @@
                 args = jsonToUrlStr(param);
             }
             if ( args ) {
-                rpClick(args);
+                if ( delay != undefined && delay == true ) {
+                    setDelayCookie(args);
+                } else {
+                    rpClick(args);
+                }
             }
         }
     }
@@ -356,11 +363,11 @@
         rpComm($(this));
     }
     /// 直接根据参数上报
-    $.rpCommParam = function(param) {
-        rpCommParam(param);
+    $.rpCommParam = function(param,delay) {
+        rpCommParam(param,delay);
     }
-    $.fn.rpCommParam = function(param) {
-        rpCommParam(param);
+    $.fn.rpCommParam = function(param,delay) {
+        rpCommParam(param,delay);
     }
     /// 外部js注册事件
     $.registerRp = function(obj,param,time) {
@@ -385,6 +392,12 @@
         }
         _time = new Date().valueOf();
         if ( $(this).attr(options.event_attr) == undefined || $(this).attr(options.event_attr) == 'click' ) {
+            rpComm($(this));
+        }
+    });
+    // longTap事件
+    $('body').delegate(selector,'longTap',function() {
+        if ( $(this).attr(options.event_attr) == undefined || $(this).attr(options.event_attr) == 'longTap' ) {
             rpComm($(this));
         }
     });
